@@ -5,7 +5,7 @@ const { generateJWT } = require('../helpers/jwt');
 
 const newUser = async (req, res = response) => {
   const {name, email, password} = req.body;
-  console.log(name, email, password);
+  // console.log(name, email, password);
 
   try {
     // Verificar email no repetido
@@ -26,7 +26,7 @@ const newUser = async (req, res = response) => {
     dbUser.password = bcrypt.hashSync(password, salt);
 
     // Generar JWT
-    const token = await generateJWT(dbUser.id, name);
+    const token = await generateJWT(dbUser.id, name, email);
 
     // Guardar en la DB
     await dbUser.save();
@@ -36,6 +36,7 @@ const newUser = async (req, res = response) => {
       ok: true,
       uid: dbUser.id,
       name,
+      email,
       token
     });
   } catch (error) {
@@ -71,13 +72,14 @@ const loginUser = async (req, res = response) => {
     }
 
     // Generar JWT
-    const token = await generateJWT(dbUser.id, dbUser.name);
+    const token = await generateJWT(dbUser.id, dbUser.name, dbUser.email);
 
     // Resp del serivicio
     return res.json({
       ok: true,
       uid: dbUser.id,
       name: dbUser.name,
+      email: dbUser.email,
       token
     });
 
@@ -90,15 +92,19 @@ const loginUser = async (req, res = response) => {
 }
 
 const renewToken = async (req, res = response) => {
+  const { uid, name, email } = req;
 
-  const { uid, name } = req;
+  // Leer db para obtener los datos
+  const dbUser = await User.findById(uid);
+  // Se podria validar si existe aunque ya se valido con el jwt
 
-  const newToken = await generateJWT(uid, name);
+  const newToken = await generateJWT(uid, dbUser.name);
 
   return res.json({
     ok: true,
     uid,
-    name,
+    name: dbUser.email,
+    email: dbUser.email,
     newToken
   });
 }
