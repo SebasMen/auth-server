@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path =  require('path');
 const { dbConnection } = require('./db/config');
 require('dotenv').config();
 
@@ -20,6 +21,11 @@ app.use(express.json());
 
 // 3. Configuración de rutas
 app.use('/api/auth', require('./routes/auth'));
+
+// Manejo de las demas rutas, montando front en back
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'public/index.html'));
+})
 
 // 2. Levantar la aplicación
 app.listen(process.env.PORT, () => {
