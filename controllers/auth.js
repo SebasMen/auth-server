@@ -103,7 +103,7 @@ const renewToken = async (req, res = response) => {
   return res.json({
     ok: true,
     uid,
-    name: dbUser.email,
+    name: dbUser.name,
     email: dbUser.email,
     newToken
   });
